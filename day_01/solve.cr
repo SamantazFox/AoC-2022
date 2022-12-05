@@ -1,4 +1,4 @@
-input = File.open("#{__DIR__}/input_1.txt") do |file|
+input = File.open("#{__DIR__}/input.txt") do |file|
   file.gets_to_end
 end
 
@@ -7,4 +7,9 @@ calories = elves.map do |i|
   i.split('\n', remove_empty: true).map(&.to_i).sum
 end
 
+puts "Part 1:"
 pp calories.max
+
+
+puts "\nPart 2:"
+pp calories.sort[-3..-1].sum
