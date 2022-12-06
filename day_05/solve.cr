@@ -11,10 +11,14 @@ struct Instruction
     @count = count.to_i
   end
 
-  def run(stack)
+  def run_1(stack)
     count.times do 
       stack[dst] << stack[src].pop
     end
+  end
+
+  def run_2(stack)
+    stack[src].pop(count).each { |x| stack[dst] << x }
   end
 end
 
@@ -52,8 +56,8 @@ class MyStack # < Reference
     @stack[key] = value
   end
 
-  def pop
-    @stack.pop(1)
+  def pop(count = 1)
+    @stack.pop(count)
   end
 
   def top_crates
@@ -64,7 +68,8 @@ class MyStack # < Reference
 end
 
 
-stack = MyStack.new
+stack_1 = MyStack.new
+stack_2 = MyStack.new
 
 9.times do |i|
   offset = i*4 + 1
@@ -73,13 +78,18 @@ stack = MyStack.new
     .map(&.byte_slice(offset, 1))
     .select(&.!= " ")
 
-  stack[id] = crates
+  stack_1[id] = crates.dup
+  stack_2[id] = crates.dup
 end
 
 instructions.each do |is|
-  is.run(stack)
+  is.run_1(stack_1)
+  is.run_2(stack_2)
 end
 
 
 puts "Part 1:"
-puts stack.top_crates.join("")
+puts stack_1.top_crates.join("")
+
+puts "\nPart 2:"
+puts stack_2.top_crates.join("")
