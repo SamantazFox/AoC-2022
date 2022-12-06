@@ -60,3 +60,41 @@ end
 
 puts "Part 1:"
 pp total
+
+
+
+def outcomeify(c : String)
+  case c
+  when "X" then return Outcome::Lost
+  when "Y" then return Outcome::Draw
+  when "Z" then return Outcome::Win
+  else
+    raise Exception.new "Unknown outcome #{c}"
+  end
+end
+
+
+total_2 = 0
+
+input.split("\n").map do |round|
+  next if round.empty?
+
+  opponent, outcome = round.split(' ')
+  opponent = shapeify(opponent)
+  outcome = outcomeify(outcome)
+
+  required_shape = nil
+  Shape.each do |shape|
+    temp_outcome = outcome(shape, opponent)
+    if temp_outcome == outcome
+      required_shape = shape
+      break
+    end
+  end
+
+  total_2 += shape_score(required_shape.not_nil!)
+  total_2 += outcome_score(required_shape.not_nil!, opponent)
+end
+
+puts "Part 2:"
+pp total_2
