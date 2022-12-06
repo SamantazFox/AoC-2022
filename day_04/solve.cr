@@ -24,3 +24,16 @@ end
 
 puts "Part 1:"
 pp overlaps
+
+
+overlaps_2 = 0
+
+assignments.each do |pair|
+  elf_1, elf_2 = pair
+  common = elf_1 & elf_2
+
+  overlaps_2 += 1 if !common.empty?
+end
+
+puts "\nPart 2:"
+pp overlaps_2
