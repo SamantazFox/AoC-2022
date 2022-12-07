@@ -6,7 +6,7 @@ end
 
 
 BIG_FOLDERS = [] of XDir
-
+ALL_FOLDERS = [] of XDir
 
 enum XType
   File
@@ -62,6 +62,8 @@ class XDir < FileOrDir
 	if total < 100_000
 	  BIG_FOLDERS << self
 	end 
+
+	ALL_FOLDERS << self
     
     @size = total
     return total
@@ -151,3 +153,17 @@ puts "Part 1:"
 #pp filesystem.dump
 #pp big_folders.inspect
 pp BIG_FOLDERS.map(&.size).sum
+
+
+
+FS_SIZE = 70_000_000
+currently_free = FS_SIZE - filesystem.size
+
+FREE_REQUIRED = 30_000_000
+requires_freeing = FREE_REQUIRED - currently_free
+
+
+candidates = ALL_FOLDERS.select(&.size.>= requires_freeing).map(&.size)
+
+puts "\nPart 2:"
+pp candidates.min
