@@ -19,13 +19,6 @@ end
 
 GRID = INPUT.split('\n', remove_empty: true).map(&.split("").map { |n| Tree.new(n.to_i) })
 
-# init known visible trees
-#grid[0].each(&.visible_v = true)
-#grid[-1].each(&.visible_v = true)
-#grid.each do |row|
-#  row[0].visible_h = true
-#  row[-1].visible_h = true
-#end
 
 def print_map #(focus_y)
   # Magic!
@@ -33,13 +26,15 @@ def print_map #(focus_y)
 
   s = String.build do |str|
     GRID.each_with_index do |row, y|
-      break if y > 10
-    
       row.each do |tree|
-        if tree.visible?
-          str << "1".colorize(:blue)
+        if tree.visible_v && tree.visible_h
+          str << tree.size.colorize(:light_green)
+        elsif tree.visible_v
+          str << tree.size.colorize(:light_red)
+        elsif tree.visible_h
+          str << tree.size.colorize(:light_blue)
         else
-          str << "0".colorize(:dark_gray)
+          str << tree.size.colorize(:dark_gray)
         end
       end
 
@@ -54,19 +49,14 @@ end
 
 # Up/Down then Down/Up
 2.times do |i|
-  GRID.each_with_index do |row, y|
-    break if y > 10
-  
-    row.each_with_index do |tree, x|
-      if y == 0
-        tree.visible_v = true 
-        # print_map
-        next
-      end
+  current_largest = GRID[0].map { |_| -1 }
 
-      previous_tree = GRID[y-1][x]
-      tree.visible_v = previous_tree.visible_v && (tree.size > previous_tree.size)
-      # print_map
+  GRID.each_with_index do |row, y|
+    row.each_with_index do |tree, x|
+      if tree.size > current_largest[x]
+        current_largest[x] = tree.size
+        tree.visible_v = true
+      end
     end
   end
 
@@ -77,23 +67,24 @@ end
 # Left/Right then Right/Left
 GRID.each_with_index do |row, y|
   2.times do |i|
+    current_largest = -1
+
     row.each_with_index do |tree, x|
-      next if x > 10
+      if tree.size > current_largest
+        tree.visible_h = true
 
-      if x == 0
-        tree.visible_h = true 
-        # print_map
-        next
+        # there won't be any larger trees now
+        break if tree.size == 9
+
+        current_largest = tree.size
       end
-
-      previous_tree = GRID[y][x-1]
-      tree.visible_h = previous_tree.visible_h && (tree.size > previous_tree.size)
-      # print_map
     end
 
     row.reverse!
   end
 end
+
+print_map
 
 visible = 0
 GRID.each &.each { |tree| visible += 1 if tree.visible? }
