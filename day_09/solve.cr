@@ -20,6 +20,39 @@ end
 class Point
   property x : Int32 = 100
   property y : Int32 = 100
+
+  def move(follow : Point)
+    x_diff = follow.x - self.x
+    y_diff = follow.y - self.y
+
+    x_off = 0
+    y_off = 0
+
+    if x_diff == 0 && y_diff.abs == 2
+      # Other point is now 2 places away vertically
+      y_off = y_diff // 2
+      
+    elsif y_diff == 0 && x_diff.abs == 2
+      # Other point is now 2 places away horizontally
+      x_off = x_diff // 2
+
+    elsif x_diff.abs == 2 || y_diff.abs == 2
+      # Other point is one or two places away diagonally
+      x_off = x_diff.sign
+      y_off = y_diff.sign
+    end
+
+    #pp self.inspect
+    #pp follow.inspect
+    #puts "x/y diff #{x_diff}/#{y_diff}"
+
+    self.x += x_off
+    self.y += y_off
+
+    # puts "Head moves #{dir}! Head is now at #{HEAD.x} / #{HEAD.y}"
+    # puts "Tail moves #{tail_dir}, now at #{TAIL.x} / #{TAIL.y}"
+    # print_map
+  end
 end
 
 
@@ -61,8 +94,6 @@ moves.each do |move|
   move.count.times do |i|
     dir = move.direction
 
-    # print "\33c\e[3J"
-
     case dir
     when "U" then HEAD.y -= 1
     when "D" then HEAD.y += 1
@@ -73,56 +104,80 @@ moves.each do |move|
       raise Exception.new "Unsupported move!!!"
     end
 
-    x_diff = HEAD.x - TAIL.x
-    y_diff = HEAD.y - TAIL.y
-
-    x_off = 0
-    y_off = 0
-
-    tail_dir = "0"
-
-    if x_diff == 0 && y_diff.abs == 2
-      # Head is now 2 places away vertically
-      y_off = y_diff // 2
-      tail_dir = y_diff > 0 ? "D" : "U"
-      
-    elsif y_diff == 0 && x_diff.abs == 2
-      # Head is now 2 places away horizontally
-      x_off = x_diff // 2
-      tail_dir = x_diff > 0 ? "R" : "L"
-
-    elsif x_diff.abs == 1 && y_diff.abs == 2
-      # Head is one place away horizontally and two vertically
-      x_off = x_diff
-      y_off = y_diff // 2
-      tail_dir = "V"
-
-    elsif y_diff.abs == 1 && x_diff.abs == 2
-      # Head is one place away vertically and two horizontally
-      x_off = x_diff // 2
-      y_off = y_diff
-      tail_dir = "H"
-
-    elsif x_diff.abs <= 1 && y_diff.abs <= 1
-      # The two points overlap, or are in the same 9x9 chunk
-      # (centered around HEAD) so do nothing
-
-    else
-      # Uh Oh...
-      raise Exception.new "We lost the tail! (#{TAIL.x} / #{TAIL.y})"
-    end
-
-    TAIL.x += x_off
-    TAIL.y += y_off
+    TAIL.move(follow: HEAD)
 
     visited["#{TAIL.x}/#{TAIL.y}"] = true
-
-    # puts "Head moves #{dir}! Head is now at #{HEAD.x} / #{HEAD.y}"
-    # puts "Tail moves #{tail_dir}, now at #{TAIL.x} / #{TAIL.y}"
-    # print_map
   end
 end
 
 
 puts "Part 1:"
 pp visited.size
+
+
+
+POINTS = (0..9).map { |_| Point.new }
+visited_2 = {} of String => Bool
+
+def print_map_2
+  s = String.build do |str|
+    (80..120).each do |y|
+      (70..130).each do |x|
+        {% begin %}
+          if x == POINTS[0].x && y == POINTS[0].y
+            str << 'H'
+          {% for x in 1..9 %}
+            elsif x == POINTS[{{x}}].x && y == POINTS[{{x}}].y
+              str << {{x.stringify}}
+          {% end %}
+          elsif x == 100 && y == 100
+            str << 's'
+          else
+            str << '.'
+          end
+        {% end %}
+      end
+
+      str << '\n'
+    end
+  end
+
+  print s
+  sleep 30.milliseconds
+end
+
+
+moves.each do |move|
+  move.count.times do |_|
+    case move.direction
+    when "U" then POINTS[0].y -= 1
+    when "D" then POINTS[0].y += 1
+    when "L" then POINTS[0].x -= 1
+    when "R" then POINTS[0].x += 1
+    else
+      # Uh Oh...
+      raise Exception.new "Unsupported move!!!"
+    end
+
+    (1..9).each do |i|
+      begin
+        # Magic!
+        #print "\33c\e[3J"
+
+        POINTS[i].move(follow: POINTS[i-1])
+        #print_map_2
+      rescue ex
+        raise Exception.new "Lost point #{i}", ex
+      end
+    end
+
+    visited_2["#{POINTS[9].x}/#{POINTS[9].y}"] = true
+  end
+
+  # puts "\n\n\n\n== #{move.direction} #{move.count} ==\n"
+  # print_map_2
+end
+
+
+puts "\nPart 2:"
+pp visited_2.size
