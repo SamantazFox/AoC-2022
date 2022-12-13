@@ -55,6 +55,11 @@ class Point
     Map.points[coordinates_ify(@x, @y)] = self
   end
 
+  def reset
+    @visited = false
+    @tentative_dist = 999_999_999
+  end
+
   # neighbors
 
   def nb(dir : Direction) : Point?
@@ -75,15 +80,20 @@ class Point
   #end
 
   def explore
-    #puts "Exploring #{@x}, #{@y}"
-    #show_map
+    # puts "Exploring #{@x}, #{@y}"
+    # show_map
+
+    # Stop here if self is the destination
+    return if coordinates_ify(@x, @y) == BEST
 
     Direction.each do |dir|
       nb = self.nb(dir)
       next if nb.nil?
 
+      # Avoid unreachable cells and "holes" at the beginning of the map
       reachable = @elevation >= (nb.elevation-1)
-      next if !reachable
+      nb_is_hole = (@elevation == 2 && nb.elevation == 0)
+      next if !reachable || nb_is_hole
 
       if !nb.visited
         nb.visited = true
@@ -110,7 +120,7 @@ BEST = "148/20"
 RAW_MAP.each_with_index do |line, y|
   line.each_with_index do |char, x|
     coords = coordinates_ify(x, y)
-  
+
     if char == 'S'
       # START = coords
       Point.new(x, y, 'a')
@@ -130,3 +140,27 @@ Map.points[START].explore
 
 puts "Part 1:"
 pp Map.points[BEST].tentative_dist
+
+
+part2_paths = [] of Int32
+
+{0, 2, 3}.each do |x|
+  (0..40).each do |y|
+    coords = coordinates_ify(0, y)
+    point = Map.points[coords]
+
+    next if point.elevation != 0
+
+    Map.points.each_value(&.reset)
+    point.tentative_dist = 0
+    point.explore
+
+    puts "#{coords} = #{Map.points[BEST].tentative_dist}"
+    part2_paths << Map.points[BEST].tentative_dist
+  end
+end
+
+
+puts "\nPart 2:"
+pp part2_paths
+pp part2_paths.min
