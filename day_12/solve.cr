@@ -144,23 +144,21 @@ pp Map.points[BEST].tentative_dist
 
 part2_paths = [] of Int32
 
-{0, 2, 3}.each do |x|
-  (0..40).each do |y|
-    coords = coordinates_ify(0, y)
-    point = Map.points[coords]
+(0..40).each do |y|
+  coords = coordinates_ify(0, y)
+  point = Map.points[coords]
 
-    next if point.elevation != 0
+  next if point.elevation != 0
 
-    Map.points.each_value(&.reset)
-    point.tentative_dist = 0
-    point.explore
+  Map.points.each_value(&.reset)
+  point.tentative_dist = 0
+  point.explore
 
-    puts "#{coords} = #{Map.points[BEST].tentative_dist}"
-    part2_paths << Map.points[BEST].tentative_dist
-  end
+  puts "#{coords} = #{Map.points[BEST].tentative_dist}"
+  part2_paths << Map.points[BEST].tentative_dist
 end
 
 
 puts "\nPart 2:"
-pp part2_paths
+#pp part2_paths
 pp part2_paths.min
