@@ -69,3 +69,44 @@ end
 
 puts "Part 1:"
 pp indices.sum
+
+
+
+
+all_packets = [
+  [[2] of Crap] of Crap,
+  [[6] of Crap] of Crap,
+]
+
+PAIRS.each do |p|
+  all_packets << p[:a]
+  all_packets << p[:b]
+end
+
+loop do
+  swap_hapenned = false
+
+  (all_packets.size-1).times do |i|
+    a = all_packets[i]
+    b = all_packets[i+1]
+
+    if !ordered?(a, b)
+      all_packets[i] = b
+      all_packets[i+1] = a
+      swap_hapenned = true
+    end
+  end
+
+  break if swap_hapenned == false
+end
+
+pos_2 = 0
+pos_6 = 0
+
+all_packets.each_with_index do |p, i|
+  pos_2 = i+1 if p == [[2] of Crap] of Crap
+  pos_6 = i+1 if p == [[6] of Crap] of Crap
+end
+
+puts "\nPart 2:"
+pp pos_2 * pos_6
