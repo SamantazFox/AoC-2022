@@ -75,8 +75,8 @@ class Point
   #end
 
   def explore
-    puts "Exploring #{@x}, #{@y}"
-    show_map
+    #puts "Exploring #{@x}, #{@y}"
+    #show_map
 
     Direction.each do |dir|
       nb = self.nb(dir)
@@ -93,7 +93,10 @@ class Point
         nb.explore
       else
         new_dist = @tentative_dist + 1
-        nb.tentative_dist = new_dist if new_dist < nb.tentative_dist
+        if new_dist < nb.tentative_dist
+          nb.tentative_dist = new_dist
+          nb.explore
+        end
         #puts " -- nb #{dir} / #{nb.tentative_dist}"
       end
     end
