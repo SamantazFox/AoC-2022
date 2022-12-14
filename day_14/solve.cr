@@ -81,7 +81,11 @@ MAX_Y = ALL_Y.max
 
 
 def get(canvas, x, y) : PixelType
-  return canvas[coordinates_ify(x, y)]? || PixelType::Air
+  point = canvas[coordinates_ify(x, y)]?
+  return point if !point.nil?
+
+  return PixelType::Wall if y == (MAX_Y+2)
+  return PixelType::Air
 end
 
 
@@ -151,6 +155,38 @@ end
 
 
 puts "Part 1:"
+# draw_map(work_canvas)
 pp landed
 
-draw_map(work_canvas)
+
+
+work_canvas_2 = CANVAS.dup
+
+landed_2 = 0
+
+loop do
+  point = Point.new(500, 0)
+
+  while true
+    # True = still falling / False = Stopped
+    falling = sand_fall_tick(point, work_canvas_2)
+    break if !falling
+  end
+
+  coords = coordinates_ify(point.x, point.y)
+  work_canvas_2[coords] = PixelType::Sand
+
+  # Stop if sand source is blocked...
+  break if get(work_canvas, 500, 0).sand?
+  landed_2 += 1
+
+  # if landed_2 % 1000 == 0
+  #   print "\33c\e[3J"
+  #   draw_map(work_canvas_2)
+  # end
+end
+
+
+puts "\nPart 2:"
+# draw_map(work_canvas_2)
+pp landed_2
