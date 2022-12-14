@@ -176,9 +176,10 @@ loop do
   coords = coordinates_ify(point.x, point.y)
   work_canvas_2[coords] = PixelType::Sand
 
-  # Stop if sand source is blocked...
-  break if get(work_canvas, 500, 0).sand?
   landed_2 += 1
+
+  # Stop if sand source is blocked...
+  break if get(work_canvas_2, 500, 0).sand?
 
   # if landed_2 % 1000 == 0
   #   print "\33c\e[3J"
