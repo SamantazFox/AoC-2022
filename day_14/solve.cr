@@ -2,7 +2,7 @@ INPUT = File.open("#{__DIR__}/input.txt") do |file|
   file.gets_to_end
 end
 
-struct Point
+class Point
   property x : Int32
   property y : Int32
 
@@ -80,21 +80,77 @@ MIN_Y = ALL_Y.min
 MAX_Y = ALL_Y.max
 
 
-# Draw!
-s = String.build do |str|
-  (MIN_Y..MAX_Y).each do |y|
-    (MIN_X..MAX_X).each do |x|
-      v = CANVAS[coordinates_ify(x, y)]? || PixelType::Air
-      case v
-      when .wall? then str << '#'
-      when .sand? then str << 'O'
-      else
-        str << '.'
-      end
-    end
+def get(canvas, x, y) : PixelType
+  return canvas[coordinates_ify(x, y)]? || PixelType::Air
+end
 
-    str << '\n'
+
+# Draw!
+def draw_map(canvas)
+  s = String.build do |str|
+    (MIN_Y..MAX_Y).each do |y|
+      (MIN_X..MAX_X).each do |x|
+        v = get(canvas, x, y)
+        case v
+        when .wall? then str << '#'
+        when .sand? then str << 'O'
+        else
+          str << '.'
+        end
+      end
+
+      str << '\n'
+    end
+  end
+
+  puts s
+end
+
+
+def sand_fall_tick(p : Point, canvas)
+  down = get(canvas, p.x, p.y+1)
+  diag_L = get(canvas, p.x-1, p.y+1)
+  diag_R = get(canvas, p.x+1, p.y+1)
+
+  if down.air?
+    p.y += 1
+    return true
+  elsif diag_L.air?
+    p.x -= 1
+    p.y += 1
+    return true
+  elsif diag_R.air?
+    p.x += 1
+    p.y += 1
+    return true
+  else
+    return false
   end
 end
 
-puts s
+work_canvas = CANVAS.dup
+
+landed = 0
+
+loop do
+  point = Point.new(500, 0)
+
+  while true
+    # True = still falling / False = Stopped
+    falling = sand_fall_tick(point, work_canvas)
+
+    break if !falling
+    break if point.y > MAX_Y
+  end
+
+  break if point.y > MAX_Y
+
+  work_canvas[coordinates_ify(point.x, point.y)] = PixelType::Sand
+  landed += 1
+end
+
+
+puts "Part 1:"
+pp landed
+
+draw_map(work_canvas)
